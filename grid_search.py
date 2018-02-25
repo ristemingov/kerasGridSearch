@@ -9,12 +9,12 @@ os.environ['PYTHONHASHSEED'] = '0'
 # The below is necessary for starting Numpy generated random numbers
 # in a well-defined initial state.
 
-np.random.seed(7)
+np.random.seed(42)
 
 # The below is necessary for starting core Python generated random numbers
 # in a well-defined state.
 
-rn.seed(7)
+rn.seed(12345)
 
 
 session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
@@ -30,7 +30,7 @@ from data_management import prepare_data
 from services import KerasGridSearchService
 # Function to create model, required for KerasClassifier
 
-tf.set_random_seed(7)
+tf.set_random_seed(1234)
 
 sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
 
