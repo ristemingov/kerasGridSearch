@@ -9,7 +9,7 @@ def dense_model(input_dim=103, output_dim=3,
                 activation='relu',
                 dropout_rate=0.0,
                 weight_constraint=0,
-                init_mode='uniform',
+                init_mode='glorot_normal',
                 neurons=50,
                 **_):
     """
@@ -25,6 +25,8 @@ def dense_model(input_dim=103, output_dim=3,
     :param _:
     :return:
     """
+
+    print(str(input_dim) + ' - ' + str(output_dim))
     model = Sequential()
     model.add(Dense(neurons, input_dim=input_dim, kernel_initializer=init_mode, activation=activation,
                     kernel_constraint=maxnorm(weight_constraint)))

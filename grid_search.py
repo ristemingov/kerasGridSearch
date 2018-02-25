@@ -48,7 +48,7 @@ def gs_find():
 
     # load dataset
     train_data, train_class, validation_data, validation_class, test_data, test_class = \
-        read_all_files(dataset_location + 'var_1_range_1_class_1x2/')
+        read_all_files(dataset_location + 'var_4_range_1_class_1x2/')
 
     x_train, y_train_encoded, x_validation, y_validation_encoded, x_test, y_test_encoded = \
         prepare_data(train_data, train_class, validation_data, validation_class, test_data, test_class)
@@ -72,11 +72,15 @@ def gs_find():
     activation = ['softmax', 'softplus', 'softsign', 'relu', 'tanh', 'sigmoid', 'hard_sigmoid', 'linear']
 
     batch_size = [100]
-    epochs = [50, 100]
+    epochs = [200]
 
     weight_constraint = [2, 3, 4]
     neurons = [20, 51]
-    dropout_rate = [0.2, 0.5, 0.7]
+    dropout_rate = [0.5, 0.7]
+
+    weight_constraint = [4]
+    neurons = [51]
+    dropout_rate = [0.5]
 
     param_grid = dict(batch_size=batch_size,
                       epochs=epochs,
@@ -89,25 +93,37 @@ def gs_find():
                       )
 
     avg_scores = {}
-    # while len(avg_scores) > 1:
-    tries = 3
-    for i in range(0, tries):
-        grid_results = KerasGridSearchService.keras_grid_search(dense_model, param_grid,
-                                                                x_train, y_train_encoded,
-                                                                x_validation, y_validation_encoded,
-                                                                keras_backend=K)
-        for gr in grid_results:
-            avg_scores.setdefault(gr, 0)
-            avg_scores[gr] += grid_results[gr]
+    size_param = KerasGridSearchService.param_grid_length(param_grid)
+    while len(avg_scores) > 1 or len(avg_scores) == 0:
+        avg_scores = avg_scores.fromkeys(avg_scores, 0)
+        tries = 10
+        for i in range(0, tries):
+            grid_results = KerasGridSearchService.keras_grid_search(dense_model, param_grid,
+                                                                    x_train, y_train_encoded,
+                                                                    x_validation, y_validation_encoded,
+                                                                    keras_backend=K)
+            for gr in grid_results:
+                avg_scores.setdefault(gr, 0)
+                avg_scores[gr] += grid_results[gr]
 
-    for avs in avg_scores:
-        avg_scores[avs] /= tries
-    print('')
-    print('')
+        for avs in avg_scores:
+            avg_scores[avs] /= tries
+        print('')
+        print('')
 
-    print('Scores: ' + str(avg_scores))
+        print('Scores: ' + str(avg_scores))
+        avg_scores = KerasGridSearchService.select_top_scores(avg_scores)
+        param_grid = KerasGridSearchService.scores_to_param_dict(avg_scores)
+        current_size_param = KerasGridSearchService.param_grid_length(param_grid)
+        if current_size_param < size_param:
+            size_param = current_size_param
+        else:
+            break
+
+    print("Winner: " + str(avg_scores))
+
     #  In a while loop should try until you get one best score
     #  make arrays from avg_scores --> param_grid
-    #  --- get the value that has mos occurrences drop all its members from the array
+    #  --- get the value that has most occurrences drop all its members from the array
     #  --- and get all the other params that it has good values with
 

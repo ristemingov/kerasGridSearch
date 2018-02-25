@@ -55,8 +55,8 @@ class KerasGridSearchService:
         :return:
         """
         scores_dict = sorted(scores_dict.items(), key=operator.itemgetter(1), reverse=True)
-
-        return dict(scores_dict[:int(len(scores_dict) * percent)])
+        top = int(len(scores_dict) * percent)
+        return dict(scores_dict[:top if top > 0 else 1])
 
     @staticmethod
     def scores_to_param_dict(scores_dict):
@@ -75,3 +75,10 @@ class KerasGridSearchService:
                 if curr_dict[param] not in param_dict[param]:
                     param_dict[param].append(curr_dict[param])
         return param_dict
+
+    @staticmethod
+    def param_grid_length(param_dict):
+        size_param = 0
+        for k in param_dict:
+            size_param += len(param_dict[k])
+        return size_param
